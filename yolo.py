@@ -132,6 +132,10 @@ class YOLO(object):
 
         for i, c in reversed(list(enumerate(out_classes))):
             predicted_class = self.class_names[c]
+            # Only show persons
+            if predicted_class != 'person':
+                continue
+
             box = out_boxes[i]
             score = out_scores[i]
 
