@@ -130,6 +130,7 @@ class YOLO(object):
                     size=np.floor(3e-2 * image.size[1] + 0.5).astype('int32'))
         thickness = (image.size[0] + image.size[1]) // 300
 
+        boxes = []
         for i, c in reversed(list(enumerate(out_classes))):
             predicted_class = self.class_names[c]
             # Only show persons
@@ -139,6 +140,20 @@ class YOLO(object):
             box = out_boxes[i]
             score = out_scores[i]
 
+            # For returning bounding boxes
+            x = int(box[1])
+            y = int(box[0])
+            w = int(box[3]-box[1])
+            h = int(box[2]-box[0])
+            if x < 0 :
+                w = w + x
+                x = 0
+            if y < 0 :
+                h = h + y
+                y = 0
+            boxes.append([x, y, w, h])
+
+            # For returning the image
             label = '{} {:.2f}'.format(predicted_class, score)
             draw = ImageDraw.Draw(image)
             label_size = draw.textsize(label, font)
@@ -168,7 +183,7 @@ class YOLO(object):
 
         end = timer()
         print(end - start)
-        return image
+        return image, boxes
 
     def close_session(self):
         self.sess.close()
