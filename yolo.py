@@ -92,8 +92,9 @@ class YOLO(object):
 
         # Generate output tensor targets for filtered bounding boxes.
         self.input_image_shape = K.placeholder(shape=(2, ))
-        if self.gpu_num>=2:
+        if self.gpu_num >= 2:
             self.yolo_model = multi_gpu_model(self.yolo_model, gpus=self.gpu_num)
+
         boxes, scores, classes = yolo_eval(self.yolo_model.output, self.anchors,
                 len(self.class_names), self.input_image_shape,
                 score_threshold=self.score, iou_threshold=self.iou)
@@ -131,6 +132,7 @@ class YOLO(object):
         thickness = (image.size[0] + image.size[1]) // 300
 
         boxes = []
+        scores = []
         for i, c in reversed(list(enumerate(out_classes))):
             predicted_class = self.class_names[c]
             # Only show persons
@@ -152,6 +154,7 @@ class YOLO(object):
                 h = h + y
                 y = 0
             boxes.append([x, y, w, h])
+            scores.append(score)
 
             # For returning the image
             label = '{} {:.2f}'.format(predicted_class, score)
@@ -183,7 +186,7 @@ class YOLO(object):
 
         end = timer()
         print(end - start)
-        return image, boxes
+        return image, boxes, scores
 
     def close_session(self):
         self.sess.close()
